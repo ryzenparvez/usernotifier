@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#076653">
+<title>লগইন</title><style>__CSS__</style>__THEME__</head><body>
+<div class="login"><div class="box"><button class="themeBtn" style="float:right" onclick="toggleTheme()"><span class="ti">🌙</span></button>
+ <div class="logo" id="logo">F</div><h1 id="t">অ্যাডমিন লগইন</h1><p id="s">বিল নোটিশ ড্যাশবোর্ড</p>
+ <input type="text" id="u" placeholder="ইউজারনেম" autocomplete="username">
+ <input type="password" id="p" placeholder="পাসওয়ার্ড" autocomplete="current-password">
+ <button class="pri" style="width:100%;padding:12px" onclick="go()">লগইন</button>
+ <div class="msg" id="m"></div>
+</div></div>
+<script>__JS__
+
+document.getElementById("logo").textContent=UI.logo;document.getElementById("s").textContent=UI.title+" · "+UI.brand;themeUI();
+document.getElementById("p").addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+async function go(){const m=document.getElementById("m");m.className="msg";m.textContent="যাচাই হচ্ছে…";
+ try{const r=await fetch("/admin/login",{method:"POST",headers:{"X-Requested-With":"jsn"},body:JSON.stringify({user:u.value,password:p.value})});const j=await r.json();
+  if(j.ok){location.href="/admin"}else{m.className="msg bad-t";m.textContent=j.error}}catch(e){m.className="msg bad-t";m.textContent="ত্রুটি: "+e}}
+</script></body></html>

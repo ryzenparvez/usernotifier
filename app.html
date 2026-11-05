@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#076653">
+<title>বিল নোটিশ ড্যাশবোর্ড</title><style>__CSS__</style>__THEME__</head><body>
+<div class="app"><aside class="side">__NAV__</aside>
+<div class="main">
+<div class="head"><div><h1 id="pt"></h1><p id="ps"></p></div><div class="hd-r"><span class="sync" id="sync"></span><button class="themeBtn" onclick="toggleTheme()"><span class="ti">🌙</span><span class="tl">ডার্ক মোড</span></button></div></div>
+
+<section class="sect on" id="s-overview" data-title="ওভারভিউ" data-sub="বিল ও পপ-আপের সারাংশ">
+ <div class="stats" id="cards"></div>
+ <h2 class="t">আগামী ৭ দিনে মেয়াদ শেষ হবে (কবে কাদের পপ-আপ যাবে)</h2><div class="sched" id="sched"></div>
+ <div class="hint"><span>ℹ️ মেয়াদের <b id="wd"></b> দিন আগে থেকে সতর্কতা পপ-আপ যায়, মেয়াদের দিন থেকে বন্ধ + পপ-আপ।</span></div>
+</section>
+
+<section class="sect" id="s-online" data-title="অনলাইন ইউজার" data-sub="MikroTik থেকে সরাসরি; এখান থেকেই পপ-আপ পাঠান">
+ <div class="row" style="margin-bottom:12px"><input type="text" id="oq" placeholder="ইউজার বা IP খুঁজুন…" style="flex:1;min-width:160px"><button onclick="refresh()">🔄 এখনই রিফ্রেশ</button></div>
+ <div class="tw"><table><thead><tr><th>ইউজার</th><th>IP</th><th>আপটাইম</th><th>MAC</th><th>বিল অবস্থা</th><th>বাকি দিন</th><th>সতর্কবার্তা</th></tr></thead><tbody id="ob"></tbody></table></div>
+</section>
+
+<section class="sect" id="s-users" data-title="সব ইউজার" data-sub="মেয়াদ, অবস্থা ও পপ-আপ শুরুর তারিখ">
+ <div class="row" style="margin-bottom:12px"><button data-f="all" class="on">সব</button><button data-f="warn">সতর্কতা চলছে</button><button data-f="expired">মেয়াদ শেষ</button><button data-f="ok">স্বাভাবিক</button><input type="text" id="q" placeholder="ইউজার খুঁজুন…" style="flex:1;min-width:160px"></div>
+ <div class="tw"><table><thead><tr><th data-s="u">ইউজার</th><th data-s="pkg">প্যাকেজ</th><th data-s="last">সর্বশেষ পেমেন্ট</th><th data-s="exp">মেয়াদ শেষ</th><th data-s="left">বাকি দিন</th><th data-s="st">অবস্থা</th><th data-s="start">পপ-আপ শুরু</th><th data-s="ip">অনলাইন</th></tr></thead><tbody id="tb"></tbody></table></div>
+</section>
+
+<section class="sect" id="s-upload" data-title="CSV আপলোড" data-sub="নতুন বিলের CSV দিলেই মেয়াদ ও পপ-আপ আপডেট হয়">
+ <div class="box"><h3>বিলের CSV</h3><p>কলাম: Date, User, Collect by, Package, BDT। বর্তমান ফাইল: <span id="files"></span></p>
+ <div class="up"><div class="row"><input type="file" id="f" accept=".csv"><label style="font-size:13px"><input type="checkbox" id="rep"> আগের সব CSV বদলে এটাই রাখুন</label><button class="pri" onclick="up()">আপলোড</button></div><div class="msg" id="msg"></div></div>
+ <div class="note">টিক না দিলে নতুন CSV আগেরগুলোর সাথে যোগ হয়; প্রতি ইউজারের সর্বশেষ পেমেন্টই ধরা হয়।</div></div>
+ <div class="box"><h3>পপ-আপ প্রিভিউ</h3><p>গ্রাহক যেটা দেখবে।</p><div class="row"><a href="/admin/preview?mode=warn" target="_blank">সতর্কতা পপ-আপ</a> · <a href="/admin/preview?mode=expired" target="_blank">মেয়াদ শেষ পপ-আপ</a></div></div>
+</section>
+
+<section class="sect" id="s-mt" data-title="MikroTik ইন্টিগ্রেশন" data-sub="API দিয়ে অনলাইন ইউজার দেখা ও পপ-আপ পাঠানো">
+ <div class="box"><h3>সংযোগ</h3><p>পাবলিক IP (বা ডোমেইন; লোকাল নেটওয়ার্কে থাকলে লোকাল IP), API পোর্ট, ইউজার ও পাসওয়ার্ড দিন।</p>
+ <div class="fg"><label>পাবলিক IP / ডোমেইন<input type="text" id="r_host" placeholder="203.0.113.10"></label><label>API পোর্ট<input type="text" id="r_port" placeholder="8728"></label><label>API ইউজার<input type="text" id="r_user"></label><label>পাসওয়ার্ড<input type="password" id="r_pw" placeholder="অপরিবর্তিত রাখতে ফাঁকা"></label>
+ <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="r_ssl"> API-SSL (পোর্ট 8729)</label><button class="pri" onclick="saveRouter()">সেভ ও কানেকশন টেস্ট</button></div><div class="msg" id="m_mt"></div></div>
+ <div class="box"><h3>MikroTik-এ API ইউজার বানান</h3><p>Terminal-এ (সফটওয়্যারের IP বসান):</p>
+ <pre>/user group add name=notifier policy=api,read,write,test
+/user add name=notifier group=notifier password=পাসওয়ার্ড address=সফটওয়্যারের-IP
+/ip service set api disabled=no port=8728 address=সফটওয়্যারের-IP</pre>
+ <div class="note">শুধু অনলাইন ইউজার দেখতে <b>read</b> যথেষ্ট; পপ-আপ পাঠাতে address-list লিখতে হয় বলে <b>write</b>-ও লাগে। API পোর্ট ইন্টারনেটে খুললে অবশ্যই <b>address=</b> দিয়ে সীমাবদ্ধ করুন।</div></div>
+</section>
+
+<section class="sect" id="s-ac" data-title="ডোমেন ও অ্যাক্সেস" data-sub="লোকাল PC-তে চলবে, ডোমেইন দিয়ে যেকোনো জায়গা থেকে ঢোকা যাবে">
+ <div class="box"><h3>ঠিকানা</h3><p>ডোমেইন, MikroTik পাবলিক IP ও এই PC-র লোকাল IP দিন।</p>
+ <div class="fg"><label>ডোমেইন (bill.furqancloud.web.id)<input type="text" id="a_domain"></label><label>MikroTik পাবলিক IP<input type="text" id="a_pub" placeholder="203.0.113.10"></label><label>এই PC-র লোকাল IP<input type="text" id="a_pc" placeholder="192.168.88.10"></label><button onclick="detect()">🔎 IP বের করুন</button><button class="pri" onclick="saveAccess()">সেভ</button></div><div class="msg" id="m_ac"></div><div id="nets" class="note"></div></div>
+ <div class="box"><h3>অ্যাক্সেস ঠিকানা</h3><div id="urls"></div></div>
+ <div class="box"><h3>ডোমেইন চালু করার ধাপ</h3><p>১) DNS-এ A রেকর্ড: ডোমেইন → MikroTik পাবলিক IP। ২) MikroTik-এ ফরওয়ার্ড রুল। ৩) PC-তে Caddy (ফ্রি HTTPS)। পাবলিক IP আসল হতে হবে (CGNAT চলবে না)।</p>
+ <button class="copyb sm" onclick="cp('o_rsc')">কপি</button><div class="note">MikroTik Terminal:</div><pre id="o_rsc"></pre>
+ <button class="copyb sm" onclick="cp('o_caddy')">কপি</button><div class="note">Caddyfile:</div><pre id="o_caddy"></pre>
+ <div class="note">চালাতে: <b>caddy run --config Caddyfile</b>। ৮০৮০ পোর্ট কখনো ইন্টারনেটে ফরওয়ার্ড করবেন না।</div></div>
+</section>
+
+<section class="sect" id="s-ui" data-title="কাস্টমাইজ" data-sub="নাম, রং ও আচরণ">
+ <div class="box"><h3>ড্যাশবোর্ড</h3><p>প্রাইমারি রং ফাঁকা রাখলে ডিফল্ট থিম (লাইট/ডার্ক) থাকবে।</p>
+ <div class="fg"><label>ড্যাশবোর্ডের নাম<input type="text" id="u_title"></label><label>সাবটাইটেল (ব্র্যান্ড লাইন)<input type="text" id="u_sub"></label><label>ব্র্যান্ড নাম<input type="text" id="u_brand"></label><label>লোগো অক্ষর<input type="text" id="u_logo" maxlength="2"></label>
+ <label>প্রাইমারি রং (#RRGGBB, ফাঁকা = ডিফল্ট)<input type="text" id="u_acc" placeholder="#076653"></label>
+ <label>সতর্কতা শুরু (মেয়াদের কত দিন আগে)<input type="text" id="u_warn"></label><label>সিঙ্ক ব্যবধান (সেকেন্ড)<input type="text" id="u_sync"></label><label>অটো-রিফ্রেশ (সেকেন্ড)<input type="text" id="u_ref"></label>
+ <label>"বুঝেছি" এর পর চুপ (3h, 30m)<input type="text" id="u_seen"></label><label>ম্যানুয়াল পপ-আপ (মিনিট)<input type="text" id="u_push"></label><label>লগইন সেশন (ঘণ্টা)<input type="text" id="u_sess"></label></div>
+ <div class="row" style="margin-top:12px"><button class="pri" onclick="saveUi()">সেভ</button></div><div class="msg" id="m_ui"></div></div>
+</section>
+
+<section class="sect" id="s-pp" data-title="পপ-আপ ডিজাইন" data-sub="গ্রাহক যা দেখে">
+ <div class="box"><h3>গ্রাহক পপ-আপ</h3><p>লোগো, পেমেন্ট নম্বর, অফিস, ফোন ও লেখা।</p>
+ <div class="note">লোগো (PNG/JPG, ২০০KB এর মধ্যে)</div><div class="row"><img id="logoprev" class="logoprev" alt=""><input type="file" id="p_logo" accept="image/*"><button class="sm" onclick="resetLogo()">ডিফল্ট লোগো</button></div>
+ <div class="note" style="margin-top:14px">পেমেন্ট নম্বর (লেবেল যেমন Send Money · ব্র্যান্ড যেমন bKash)</div><div class="lst" id="p_nums"></div><button class="sm" onclick="addRow()">+ নম্বর যোগ</button>
+ <div class="fg" style="margin-top:14px"><label>অফিস ঠিকানা<input type="text" id="p_office"></label><label>যোগাযোগ ফোন<input type="text" id="p_phone"></label>
+ <label class="full">সতর্কতা পপ-আপের লেখা<textarea id="p_warn"></textarea></label><label class="full">মেয়াদ শেষ পপ-আপের লেখা<textarea id="p_exp"></textarea></label></div>
+ <div class="row" style="margin-top:12px"><button class="pri" onclick="savePopup()">সেভ</button><a href="/admin/preview?mode=warn" target="_blank">সতর্কতা প্রিভিউ</a><a href="/admin/preview?mode=expired" target="_blank">মেয়াদ শেষ প্রিভিউ</a></div><div class="msg" id="m_pp"></div></div>
+</section>
+
+<section class="sect" id="s-sec" data-title="লগইন ও পাসওয়ার্ড" data-sub="ইউজার/পাসওয়ার্ড বদল ও ইতিহাস">
+ <div class="box"><h3>ইউজার ও পাসওয়ার্ড বদলান</h3><p>বর্তমান পাসওয়ার্ড দিতে হবে; নতুন পাসওয়ার্ড কমপক্ষে ১০ অক্ষর। বদলালে অন্য সব ডিভাইসের লগইন বন্ধ হয়ে যায়।</p>
+ <div class="fg"><label>বর্তমান ইউজার<input type="text" id="c_cur_u" disabled></label><label>বর্তমান পাসওয়ার্ড<input type="password" id="c_cur"></label><label>নতুন ইউজার (না বদলালে ফাঁকা)<input type="text" id="c_nu"></label><label>নতুন পাসওয়ার্ড (না বদলালে ফাঁকা)<input type="password" id="c_np"></label><label>নতুন পাসওয়ার্ড আবার<input type="password" id="c_np2"></label><button class="pri" onclick="saveAcc()">পরিবর্তন করুন</button></div><div class="msg" id="m_sec"></div></div>
+ <div class="box"><h3>পরিবর্তনের ইতিহাস</h3><p>কবে ইউজার বা পাসওয়ার্ড বদলানো হয়েছে (পাসওয়ার্ড নিজে কখনো সংরক্ষিত হয় না)।</p><div class="tw"><table><thead><tr><th>সময়</th><th>পরিবর্তন</th><th>কোন IP থেকে</th></tr></thead><tbody id="hist"></tbody></table></div>
+ <div class="row" style="margin-top:12px"><button onclick="logoutAll()">অন্য সব ডিভাইসের লগইন বন্ধ করুন</button></div><div class="msg" id="m_ls"></div></div>
+</section>
+<footer class="pf">© 2026 <b id="fbrand">Furqan Cloud</b>. All rights reserved.</footer>
+</div></div>
+<script>__JS__
+let D=__DATA__,C=__CFG__;const DEMO=__DEMO__;
+const fd=iso=>{if(!iso)return "—";const [y,m,d]=iso.split("-");return bn(`${d}/${m}/${y}`)};
+const ST={warn:"সতর্কতা পপ-আপ",expired:"বন্ধ · পপ-আপ",ok:"স্বাভাবিক",unknown:"বিল তালিকায় নেই"};
+let flt="all",key="exp",dir=1,logoData=null;
+async function api(p,b){if(DEMO&&b!==undefined)return {ok:true,msg:"ডেমো: আসল সিস্টেমে সেভ হবে",local:[],public:""};
+ const r=await fetch("/admin/api/"+p,b!==undefined?{method:"POST",headers:{"X-Requested-With":"jsn"},body:JSON.stringify(b)}:{});if(r.status===401)location.href="/admin";return r.json()}
+function say(id,j,ok){const m=$(id);m.className="msg "+(j.ok?"ok-t":"bad-t");m.textContent=j.ok?(ok||j.msg||"সেভ হয়েছে ✓"):"ত্রুটি: "+j.error}
+function cp(id){navigator.clipboard.writeText($(id).textContent)}
+function renderTop(){
+ $("sync").textContent=(D.sync.ok?"🟢 ":"🔴 ")+D.sync.msg+(D.sync.time?" · "+D.sync.time:"");$("files").textContent=D.files.join(", ")||"নেই";$("wd").textContent=bn(D.warn_days);
+ const cnt=s=>D.users.filter(u=>u.st===s).length;
+ $("cards").innerHTML=`<div class="stat"><span>মোট ইউজার</span><b>${bn(D.users.length)}</b></div><div class="stat o"><span>এখন অনলাইন (MikroTik)</span><b>${bn(D.online.length)}</b></div><div class="stat w"><span>সতর্কতা পপ-আপ চলছে</span><b>${bn(cnt("warn"))}</b></div><div class="stat e"><span>মেয়াদ শেষ / বন্ধ</span><b>${bn(cnt("expired"))}</b></div><div class="stat"><span>স্বাভাবিক</span><b>${bn(cnt("ok"))}</b></div>`;
+ const t0=new Date(D.today),days=[];for(let i=0;i<7;i++){const d=new Date(t0);d.setDate(d.getDate()+i);days.push(d.toISOString().slice(0,10))}
+ $("sched").innerHTML=days.map((d,i)=>{const us=D.users.filter(u=>u.exp===d);return `<div class="card"><b style="font-size:15px">${fd(d)}${i==0?" (আজ)":""}</b><br><span style="color:var(--muted);font-size:12px">${bn(us.length)} জনের মেয়াদ শেষ</span><small>${us.slice(0,8).map(u=>esc(u.u)).join(", ")||"—"}${us.length>8?" … +"+bn(us.length-8):""}</small></div>`}).join("")}
+function draw(){const q=$("q").value.toLowerCase();let r=D.users.filter(u=>(flt==="all"||u.st===flt)&&u.u.toLowerCase().includes(q));r.sort((a,b)=>(a[key]>b[key]?1:a[key]<b[key]?-1:0)*dir);
+ $("tb").innerHTML=r.map(u=>`<tr><td data-l="ইউজার"><b>${esc(u.u)}</b></td><td data-l="প্যাকেজ">${esc(u.pkg)}</td><td data-l="সর্বশেষ পেমেন্ট">${fd(u.last)}</td><td data-l="মেয়াদ শেষ">${fd(u.exp)}</td><td data-l="বাকি দিন">${u.left<=0?"—":bn(u.left)}</td><td data-l="অবস্থা"><span class="pill p-${u.st}">${ST[u.st]}</span></td><td data-l="পপ-আপ শুরু">${fd(u.start)}</td><td data-l="অনলাইন">${u.ip?"🟢 "+esc(u.ip):"⚪ অফলাইন"}</td></tr>`).join("")}
+function drawOnline(){const q=$("oq").value.toLowerCase(),r=D.online.filter(u=>u.u.toLowerCase().includes(q)||u.ip.includes(q));
+ $("ob").innerHTML=r.map(u=>`<tr><td data-l="ইউজার"><b>${esc(u.u)}</b></td><td data-l="IP">${esc(u.ip)}</td><td data-l="আপটাইম">${esc(u.up)}</td><td data-l="MAC">${esc(u.mac)}</td><td data-l="বিল অবস্থা"><span class="pill p-${u.st}">${ST[u.st]}</span></td><td data-l="বাকি দিন">${u.left==null||u.left<=0?"—":bn(u.left)}</td><td data-l="সতর্কবার্তা"><button class="pri sm" data-push="${esc(u.u)}">⚠ পপ-আপ পাঠান</button>${u.manual?' <span class="sent">✓ পাঠানো</span>':""}</td></tr>`).join("")||'<tr><td colspan="7" style="text-align:center;color:var(--muted)">কোনো অনলাইন ইউজার নেই / রাউটার সংযুক্ত নয়</td></tr>'}
+function renderAll(){renderTop();draw();drawOnline()}
+async function refresh(){if(DEMO){alert("এটা ডেমো");return}const j=await api("refresh",{});if(j.users){D=j;renderAll()}}
+async function poll(){try{const j=await api("state");if(j.users){D=j;renderAll()}}catch(e){}}
+$("ob").onclick=async e=>{const u=e.target.dataset.push;if(!u)return;const m=prompt("ইউজার "+u+" কে কী বার্তা যাবে? (ফাঁকা রাখলে ডিফল্ট সতর্কবার্তা যাবে)","");if(m===null)return;
+ if(DEMO){alert("ডেমো: আসল সিস্টেমে "+u+" এর কাছে এখনই পপ-আপ চলে যাবে");return}
+ const j=await api("push",{user:u,msg:m,minutes:(UI.push_minutes)||30});alert(j.ok?"পপ-আপ পাঠানো হয়েছে":"ত্রুটি: "+j.error);poll()};
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{flt=b.dataset.f;document.querySelectorAll("[data-f]").forEach(x=>x.classList.toggle("on",x===b));draw()});
+document.querySelectorAll("th[data-s]").forEach(h=>h.onclick=()=>{dir=key===h.dataset.s?-dir:1;key=h.dataset.s;draw()});
+$("q").oninput=draw;$("oq").oninput=drawOnline;
+async function up(){const f=$("f").files[0],m=$("msg");if(!f){m.textContent="আগে CSV ফাইল বাছুন";return}
+ if(DEMO){m.textContent="এটা ডেমো; আসল ড্যাশবোর্ডে আপলোড কাজ করে।";return}
+ if($("rep").checked&&!confirm("আগের সব CSV আর্কাইভে সরে যাবে। নিশ্চিত?"))return;m.textContent="আপলোড হচ্ছে…";
+ try{const r=await (await fetch("/admin/upload?replace="+($("rep").checked?1:0),{method:"POST",headers:{"X-Requested-With":"jsn"},body:await f.arrayBuffer()})).json();
+  if(r.ok){m.className="msg ok-t";m.textContent=`সফল: ${bn(r.rows)} টি রেকর্ড, ${bn(r.users)} জন ইউজার। রিলোড হচ্ছে…`;setTimeout(()=>location.reload(),1200)}else{m.className="msg bad-t";m.textContent="ত্রুটি: "+r.error}}catch(e){m.className="msg bad-t";m.textContent="ত্রুটি: "+e}}
+/* ---- সেটিং ---- */
+function fill(){const R=C.router,A=C.access,U=C.ui,P=C.popup;
+ r_host.value=R.host;r_port.value=R.port;r_user.value=R.user;r_ssl.checked=R.ssl;r_pw.value="";
+ a_domain.value=A.domain;a_pub.value=A.public_ip;a_pc.value=A.pc_ip;
+ u_title.value=U.title;u_sub.value=U.sub;u_brand.value=U.brand;u_logo.value=U.logo;u_acc.value=U.acc;u_warn.value=U.warn_days;u_sync.value=U.sync_seconds;u_ref.value=U.refresh;u_seen.value=U.seen_timeout;u_push.value=U.push_minutes;u_sess.value=U.session_hours;
+ $("p_nums").innerHTML="";P.numbers.forEach(n=>addRow(n));p_office.value=P.office;p_phone.value=P.phone;p_warn.value=P.warn_notice;p_exp.value=P.expired_notice;$("logoprev").src=P.logo||C.default_logo;
+ c_cur_u.value=C.account.user;$("hist").innerHTML=C.account.history.slice().reverse().map(h=>`<tr><td data-l="সময়">${esc(h.at)}</td><td data-l="পরিবর্তন">${esc(h.what)}</td><td data-l="IP">${esc(h.ip)}</td></tr>`).join("");urls();snips()}
+function addRow(v){const f=[["label","লেবেল (Send Money)"],["number","নম্বর"],["brand","ব্র্যান্ড (bKash)"]];const d=document.createElement("div");d.className="it";
+ d.innerHTML=f.map(([k,p])=>`<input type="text" data-k="${k}" placeholder="${p}" value="${esc(v?v[k]:"")}">`).join("")+'<button class="sm" onclick="this.parentNode.remove()">✕</button>';$("p_nums").appendChild(d)}
+const rows=()=>[...$("p_nums").children].map(r=>Object.fromEntries([...r.querySelectorAll("input")].map(i=>[i.dataset.k,i.value.trim()]))).filter(o=>Object.values(o).some(Boolean));
+async function saveRouter(){$("m_mt").className="msg";$("m_mt").textContent="টেস্ট হচ্ছে…";const j=await api("router",{host:r_host.value,port:r_port.value,user:r_user.value,password:r_pw.value,ssl:r_ssl.checked});say("m_mt",j,"সংযুক্ত ✓ "+(j.msg||""))}
+async function saveAccess(){const j=await api("access",{domain:a_domain.value,public_ip:a_pub.value,pc_ip:a_pc.value});if(j.ok){C.access={domain:a_domain.value.trim(),public_ip:a_pub.value.trim(),pc_ip:a_pc.value.trim()};urls();snips()}say("m_ac",j)}
+async function detect(){$("m_ac").className="msg";$("m_ac").textContent="খোঁজা হচ্ছে…";const j=await api("netinfo");if(DEMO){$("nets").textContent="ডেমো: আসল সিস্টেমে PC-র লোকাল IP ও পাবলিক IP এখানে দেখাবে";$("m_ac").textContent="";return}
+ $("nets").innerHTML="লোকাল IP: <b>"+esc(j.local.join(", ")||"—")+"</b> · ইন্টারনেট থেকে দেখা পাবলিক IP: <b>"+esc(j.public||"পাওয়া যায়নি")+"</b> (MikroTik-এর WAN IP না-ও হতে পারে; যাচাই করে বসান)";
+ if(j.local[0]&&!a_pc.value)a_pc.value=j.local[0];if(j.public&&!a_pub.value)a_pub.value=j.public;$("m_ac").textContent="পাওয়া গেছে; যাচাই করে সেভ চাপুন"}
+function urls(){const A=C.access,port=location.port||"8080",o=[["লোকাল (PC)","http://localhost:"+port+"/admin"]];if(A.pc_ip)o.push(["লোকাল নেটওয়ার্ক","http://"+A.pc_ip+":"+port+"/admin"]);
+ if(A.domain)o.push(["ডোমেইন (HTTPS)","https://"+A.domain+"/admin"]);if(A.public_ip)o.push(["পাবলিক IP (শুধু প্রাথমিক পরীক্ষা)","http://"+A.public_ip+":"+port+"/admin"]);
+ $("urls").innerHTML=o.map(([k,v])=>`<div class="kv"><span>${k}</span><b><a href="${esc(v)}" target="_blank">${esc(v)}</a></b></div>`).join("")}
+function snips(){const A=C.access,pc=A.pc_ip||"PC-র-লোকাল-IP",d=A.domain||"your.domain.com";
+ $("o_rsc").textContent=`/ip firewall nat\nadd chain=dstnat in-interface-list=WAN protocol=tcp dst-port=80,443 action=dst-nat to-addresses=${pc} comment="jsn: dashboard via Caddy" place-before=0\n/ip firewall filter\nadd chain=forward in-interface-list=WAN dst-address=${pc} protocol=tcp dst-port=80,443 connection-nat-state=dstnat action=accept comment="jsn: dashboard in" place-before=0\n# WAN ইন্টারফেস লিস্টের নাম আলাদা হলে in-interface-list এর জায়গায় in-interface=ether1 (বা pppoe-out1) দিন`;
+ $("o_caddy").textContent=`${d} {\n    encode gzip\n    reverse_proxy 127.0.0.1:8080\n}`}
+async function saveUi(){const j=await api("ui",{title:u_title.value,sub:u_sub.value,brand:u_brand.value,logo:u_logo.value,acc:u_acc.value,warn_days:u_warn.value,sync_seconds:u_sync.value,refresh:u_ref.value,seen_timeout:u_seen.value,push_minutes:u_push.value,session_hours:u_sess.value});
+ say("m_ui",j,"সেভ হয়েছে ✓");if(j.ok&&!DEMO)setTimeout(()=>location.reload(),800)}
+$("p_logo").onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>200000){say("m_pp",{ok:false,error:"লোগো ২০০KB এর বেশি"});return}const r=new FileReader();r.onload=()=>{logoData=r.result;$("logoprev").src=logoData};r.readAsDataURL(f)};
+function resetLogo(){logoData="";$("logoprev").src=C.default_logo}
+async function savePopup(){const b={numbers:rows(),office:p_office.value,phone:p_phone.value,warn_notice:p_warn.value,expired_notice:p_exp.value};if(logoData!==null)b.logo=logoData;const j=await api("popup",b);say("m_pp",j)}
+async function saveAcc(){if(c_np.value!==c_np2.value){say("m_sec",{ok:false,error:"নতুন পাসওয়ার্ড দুইবার মিলছে না"});return}
+ const j=await api("account",{current:c_cur.value,new_user:c_nu.value,new_password:c_np.value});say("m_sec",j,"পরিবর্তন হয়েছে ✓");if(j.ok&&!DEMO){c_cur.value=c_nu.value=c_np.value=c_np2.value="";setTimeout(()=>location.reload(),900)}}
+async function logoutAll(){const j=await api("logout_others",{});say("m_ls",j,"অন্য সব সেশন বন্ধ হয়েছে ✓")}
+renderAll();fill();if(!DEMO)setInterval(poll,(UI.refresh||15)*1000);
+</script></body></html>

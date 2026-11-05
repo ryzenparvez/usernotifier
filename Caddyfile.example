@@ -1,0 +1,5 @@
+# bill.example.com এর জায়গায় আপনার ডোমেইন দিন (সেটিং > ডোমেন ও অ্যাক্সেস থেকেও কপি করা যায়)
+bill.example.com {
+    encode gzip
+    reverse_proxy 127.0.0.1:8080
+}
